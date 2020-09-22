@@ -1,0 +1,6 @@
+commerce/db.sqlite3
+commerce/auctions/__pycache__/
+commerce/auctions/migrations/__pycache__/
+commerce/commerce/__pycache__/
+commerce/commerce/migrations/__pycache__/
+
