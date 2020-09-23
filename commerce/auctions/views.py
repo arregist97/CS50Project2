@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from .models import Listing
 from django.contrib.auth.decorators import login_required
+from django import forms
 
 from .models import User
 
@@ -66,16 +67,29 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+class NewListingForm(forms.Form):
+    title = forms.CharField(label="Title")
+    description = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Description")
+    price = forms.CharField(label="Price")
+
 @login_required
 def listing(request):
     if request.method == "POST":
-        title = request.POST["title"]
-        description = request.POST["description"]
-        price = request.POST["price"]
-        seller = User.objects.get(username=request.user.username)
+        form = NewListingForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            description = form.cleaned_data["description"]
+            price = form.cleaned_data["price"]
+            seller = User.objects.get(username=request.user.username)
 
-        listing = Listing(title=title, description=description, current_price=price, seller=seller)
-        listing.save()
-        return HttpResponseRedirect(reverse("index"))
+            listing = Listing(title=title, description=description, current_price=price, seller=seller)
+            listing.save()
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            return render(request, "auctions/listing.html", {
+                "form": form
+            })
     else:
-        return render(request, "auctions/listing.html")
+        return render(request, "auctions/listing.html", {
+            "form": NewListingForm()
+        })
