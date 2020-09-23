@@ -16,5 +16,5 @@ class Listing(models.Model):
     photo = models.CharField(max_length=256)
 
     def __str__(self):
-        return f"{self.title}(${self.current_price})"
+        return f"{self.title}(${self.current_price}):{self.id}"
 
