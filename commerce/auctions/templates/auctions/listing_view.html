@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Item: {{ title }}</h2>
+    <p>Item ID: {{ listing_id }}</p>
+
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+
+    <div>
+        <h4>Description:</h4>
+        <p>{{description}}</p>
+        <p>Current Price: ${{current_price}}</p>
+    </div>
+
+
+{% endblock %}
