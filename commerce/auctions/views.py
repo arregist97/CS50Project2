@@ -77,7 +77,10 @@ def listing(request):
 
 def listing_view(request, listing_id):
     items = Listing.objects.all()
-    item = items.get(id=listing_id)
+    try:
+        item = items.get(id=listing_id)
+    except:
+        return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
     return render(request, "auctions/listing_view.html", {
 #        "message": "Are you logged in?",
         "title": item.title,
