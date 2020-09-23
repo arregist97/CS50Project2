@@ -3,9 +3,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import Listing
+from .models import Listing, User
 
-from .models import User
 
 
 def index(request):
@@ -75,3 +74,14 @@ def listing(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/listing.html")
+
+def listing_view(request, listing_id):
+    items = Listing.objects.all()
+    item = items.get(id=listing_id)
+    return render(request, "auctions/listing_view.html", {
+#        "message": "Are you logged in?",
+        "title": item.title,
+        "description": item.description,
+        "listing_id": item.id,
+        "current_price": item.current_price 
+    })
