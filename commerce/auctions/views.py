@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from .models import Listing, User
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -63,13 +64,16 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+@login_required
 def listing(request):
     if request.method == "POST":
         title = request.POST["title"]
         description = request.POST["description"]
         price = request.POST["price"]
+        seller = User.objects.get(username=request.user.username)
 
-        listing = Listing(title=title, description=description, current_price=price)
+        listing = Listing(title=title, description=description, current_price=price, seller=seller)
         listing.save()
         return HttpResponseRedirect(reverse("index"))
     else:

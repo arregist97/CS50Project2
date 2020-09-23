@@ -12,8 +12,8 @@ class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=65536)
     current_price = models.FloatField()
-#   seller = models.ForeignKey(User, on_delete=models.CASCADE)
-    photo = models.BinaryField()
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    photo = models.CharField(max_length=256)
 
     def __str__(self):
         return f"{self.title}(${self.current_price}):{self.id}"

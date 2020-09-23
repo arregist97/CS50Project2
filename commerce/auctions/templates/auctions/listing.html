@@ -8,13 +8,13 @@
         <div>{{ message }}</div>
     {% endif %}
 
-    <form action="{% url 'listing' %}" method="post">
+    <form action="{% url 'listing' %}" method="post" id="listingform">
         {% csrf_token %}
         <div class="form-group">
             <input class="form-control" autofocus type="text" name="title" placeholder="Title">
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="description" placeholder="Description">
+            <textarea form="listingform" class="form-control" type="text" name="description" placeholder="Description"></textarea>
         </div>
         <div class="form-group">
             <input class="form-control" type="number" name="price" placeholder="Starting Price">
