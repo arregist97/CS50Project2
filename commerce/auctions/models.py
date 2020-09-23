@@ -16,5 +16,5 @@ class Listing(models.Model):
     photo = models.BinaryField()
 
     def __str__(self):
-        return f"{self.title}:{self.seller} (${self.current_price})"
+        return f"{self.title}(${self.current_price})"
 
