@@ -32,4 +32,4 @@ class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f"{self.user.username}:{self.listing.title}"
+        return f"{self.user.username}:{self.text}"
