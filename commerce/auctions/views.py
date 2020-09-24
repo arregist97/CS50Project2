@@ -96,6 +96,9 @@ def listing(request):
 class NewBidForm(forms.Form):
     price = forms.FloatField(label="Price")
 
+class NewCommentForm(forms.Form):
+    comment = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Comment")
+
 def listing_view(request, listing_id):
     items = Listing.objects.all()
     try:
@@ -109,13 +112,13 @@ def listing_view(request, listing_id):
         if (bid.price >= current_price):
             current_price = bid.price
     
-     
+    comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
 
     if request.method == "POST":
-        form = NewBidForm(request.POST)
-        if form.is_valid():
+        bidform = NewBidForm(request.POST)
+        if bidform.is_valid():
             user = User.objects.get(username=request.user.username)
-            price = form.cleaned_data["price"]
+            price = bidform.cleaned_data["price"]
             listing = Listing.objects.get(id=listing_id)
 
             if(price <= current_price):
@@ -126,7 +129,9 @@ def listing_view(request, listing_id):
                 "listing_id": item.id,
                 "current_price": current_price,
                 "bids": bids,
-                "form": form
+                "bidform": bidform,
+                "commentform": NewCommentForm,
+                "comments": comments
             })
 
             bid = Bid(user=user, price=price, listing=listing)
@@ -140,7 +145,9 @@ def listing_view(request, listing_id):
                 "listing_id": item.id,
                 "current_price": current_price,
                 "bids": bids,
-                "form": form
+                "bidform": bidform,
+                "commentform": NewCommentForm,
+                "comments": comments
             })
     else:
     
@@ -151,5 +158,58 @@ def listing_view(request, listing_id):
             "listing_id": item.id,
             "current_price": current_price,
             "bids": bids,
-            "form": NewBidForm
+            "bidform": NewBidForm,
+            "commentform": NewCommentForm,
+            "comments": comments
+        })
+
+    
+def comment(request, listing_id):
+    items = Listing.objects.all()
+    try:
+        item = items.get(pk=listing_id)
+    except:
+        return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
+
+    current_price = item.starting_price
+    bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
+    for bid in bids:
+        if (bid.price >= current_price):
+            current_price = bid.price
+    
+    comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
+
+    if request.method == "POST":
+        commentform = NewCommentForm(request.POST)
+        if commentform.is_valid():
+            user = User.objects.get(username=request.user.username)
+            text = commentform.cleaned_data["comment"]
+            listing = Listing.objects.get(id=listing_id)
+
+            comment = Comment(user=user, text=text, listing=listing)
+            comment.save()
+            return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+        else:
+            
+            return render(request, "auctions/listing_view.html", {
+                "title": item.title,
+                "description": item.description,
+                "listing_id": item.id,
+                "current_price": current_price,
+                "bids": bids,
+                "bidform": NewBidForm,
+                "commentform": commentform,
+                "comments": comments
+            })
+    else:
+    
+        return render(request, "auctions/listing_view.html", {
+            "title": item.title,
+            "description": item.description,
+            "listing_id": item.id,
+            "current_price": current_price,
+            "bids": bids,
+            "bidform": NewBidForm,
+            "commentform": NewCommentForm,
+            "comments": comments
         })
