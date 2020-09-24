@@ -11,10 +11,25 @@ class User(AbstractUser):
 class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=65536)
-    current_price = models.FloatField()
+    starting_price = models.FloatField()
     seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     photo = models.CharField(max_length=256)
 
     def __str__(self):
-        return f"{self.title}(${self.current_price}):{self.id}"
+        return f"{self.title}(${self.starting_price}):{self.id}"
 
+class Bid(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    price = models.FloatField()
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}(${self.price}):{self.listing.title}"
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    text = models.CharField(max_length=65536)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}:{self.listing.title}"

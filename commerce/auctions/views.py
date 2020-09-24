@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import Listing, User
+from .models import Listing, User, Bid, Comment
 from django.contrib.auth.decorators import login_required
 from django import forms
 
@@ -69,7 +69,7 @@ def register(request):
 class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Description")
-    price = forms.CharField(label="Price")
+    price = forms.FloatField(label="Price")
 
 @login_required
 def listing(request):
@@ -81,7 +81,7 @@ def listing(request):
             price = form.cleaned_data["price"]
             seller = User.objects.get(username=request.user.username)
 
-            listing = Listing(title=title, description=description, current_price=price, seller=seller)
+            listing = Listing(title=title, description=description, starting_price=price, seller=seller)
             listing.save()
             return HttpResponseRedirect(reverse("index"))
         else:
@@ -93,16 +93,63 @@ def listing(request):
             "form": NewListingForm()
         })
 
+class NewBidForm(forms.Form):
+    price = forms.FloatField(label="Price")
+
 def listing_view(request, listing_id):
     items = Listing.objects.all()
     try:
         item = items.get(pk=listing_id)
     except:
         return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
-    return render(request, "auctions/listing_view.html", {
-#        "message": "Are you logged in?",
-        "title": item.title,
-        "description": item.description,
-        "listing_id": item.id,
-        "current_price": item.current_price 
-    })
+
+    current_price = item.starting_price
+    bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
+    for bid in bids:
+        if (bid.price >= current_price):
+            current_price = bid.price
+    
+     
+
+    if request.method == "POST":
+        form = NewBidForm(request.POST)
+        if form.is_valid():
+            user = User.objects.get(username=request.user.username)
+            price = form.cleaned_data["price"]
+            listing = Listing.objects.get(id=listing_id)
+
+            if(price <= current_price):
+                return render(request, "auctions/listing_view.html", {
+                "message": "Price must be higher than current price: " + str(current_price) + ".",
+                "title": item.title,
+                "description": item.description,
+                "listing_id": item.id,
+                "current_price": current_price,
+                "bids": bids,
+                "form": form
+            })
+
+            bid = Bid(user=user, price=price, listing=listing)
+            bid.save()
+            return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+        else:
+            
+            return render(request, "auctions/listing_view.html", {
+                "title": item.title,
+                "description": item.description,
+                "listing_id": item.id,
+                "current_price": current_price,
+                "bids": bids,
+                "form": form
+            })
+    else:
+    
+        return render(request, "auctions/listing_view.html", {
+    #        "message": "Are you logged in?",
+            "title": item.title,
+            "description": item.description,
+            "listing_id": item.id,
+            "current_price": current_price,
+            "bids": bids,
+            "form": NewBidForm
+        })
