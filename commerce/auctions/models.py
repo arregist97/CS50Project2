@@ -16,7 +16,13 @@ class Listing(models.Model):
     photo = models.CharField(max_length=256)
 
     def __str__(self):
-        return f"{self.title}(${self.starting_price}):{self.id}"
+        current_price = self.starting_price
+        bids = Bid.objects.filter(listing=self)
+        for bid in bids:
+            if (bid.price >= current_price):
+                current_price = bid.price
+
+        return f"{self.title}(${current_price}):{self.id}"
 
 class Bid(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
