@@ -72,7 +72,7 @@ class NewListingForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Description")
     price = forms.FloatField(label="Price")
 
-@login_required
+@login_required(login_url='/login')
 def listing(request):
     if request.method == "POST":
         form = NewListingForm(request.POST)
@@ -100,7 +100,6 @@ class NewBidForm(forms.Form):
 class NewCommentForm(forms.Form):
     comment = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Comment")
 
-@login_required
 def listing_view(request, listing_id):
     items = Listing.objects.all()
     try:
@@ -117,40 +116,43 @@ def listing_view(request, listing_id):
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
 
     if request.method == "POST":
-        bidform = NewBidForm(request.POST)
-        if bidform.is_valid():
-            user = User.objects.get(username=request.user.username)
-            price = bidform.cleaned_data["price"]
-            listing = Listing.objects.get(id=listing_id)
+        if request.user.is_authenticated:
+            bidform = NewBidForm(request.POST)
+            if bidform.is_valid():
+                user = User.objects.get(username=request.user.username)
+                price = bidform.cleaned_data["price"]
+                listing = Listing.objects.get(id=listing_id)
 
-            if(price <= current_price):
-                return render(request, "auctions/listing_view.html", {
-                "message": "Price must be higher than current price: " + str(current_price) + ".",
-                "title": item.title,
-                "description": item.description,
-                "listing_id": item.id,
-                "current_price": current_price,
-                "bids": bids,
-                "bidform": bidform,
-                "commentform": NewCommentForm,
-                "comments": comments
-            })
+                if(price <= current_price):
+                    return render(request, "auctions/listing_view.html", {
+                    "message": "Price must be higher than current price: " + str(current_price) + ".",
+                    "title": item.title,
+                    "description": item.description,
+                    "listing_id": item.id,
+                    "current_price": current_price,
+                    "bids": bids,
+                    "bidform": bidform,
+                    "commentform": NewCommentForm,
+                    "comments": comments
+                })
 
-            bid = Bid(user=user, price=price, listing=listing)
-            bid.save()
-            return HttpResponseRedirect(reverse("listing_id", args=listing_id))
-        else:
+                bid = Bid(user=user, price=price, listing=listing)
+                bid.save()
+                return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+            else:
             
-            return render(request, "auctions/listing_view.html", {
-                "title": item.title,
-                "description": item.description,
-                "listing_id": item.id,
-                "current_price": current_price,
-                "bids": bids,
-                "bidform": bidform,
-                "commentform": NewCommentForm,
-                "comments": comments
-            })
+                return render(request, "auctions/listing_view.html", {
+                    "title": item.title,
+                    "description": item.description,
+                    "listing_id": item.id,
+                    "current_price": current_price,
+                    "bids": bids,
+                    "bidform": bidform,
+                    "commentform": NewCommentForm,
+                    "comments": comments
+                })
+        else:
+            return HttpResponseRedirect(reverse("login"))
     else:
     
         return render(request, "auctions/listing_view.html", {
@@ -165,7 +167,7 @@ def listing_view(request, listing_id):
             "comments": comments
         })
 
-@login_required    
+@login_required(login_url='/login')  
 def comment(request, listing_id):
     items = Listing.objects.all()
     try:
@@ -205,19 +207,11 @@ def comment(request, listing_id):
             })
     else:
     
-        return render(request, "auctions/listing_view.html", {
-            "title": item.title,
-            "description": item.description,
-            "listing_id": item.id,
-            "current_price": current_price,
-            "bids": bids,
-            "bidform": NewBidForm,
-            "commentform": NewCommentForm,
-            "comments": comments
-        })
-@login_required
+        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+@login_required(login_url='/login')
 def close(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
-    listing.is_closed = True
-    listing.save()
+    if listing.seller.username == request.user.username:
+        listing.is_closed = True
+        listing.save()
     return HttpResponseRedirect(reverse("index"))
