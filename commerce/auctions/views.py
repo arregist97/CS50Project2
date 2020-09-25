@@ -234,13 +234,13 @@ def watch(request, listing_id):
         print(len(items_watched))
         if len(items_watched) >=1:             
             items_watched.delete() #Remove the watch(s)
-            return HttpResponse("You are no longer watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
-
-        #Create and save the new watch
-        watch = Watch(user=user,listing=item)
-        watch.save()
-        return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
-#        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+            #return HttpResponse("You are no longer watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
+        else:
+            #Create and save the new watch
+            watch = Watch(user=user,listing=item)
+            watch.save()
+            #return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
+        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
 
 
 @login_required
