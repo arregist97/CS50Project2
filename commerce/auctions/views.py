@@ -108,6 +108,9 @@ def listing_view(request, listing_id):
     except:
         return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
 
+    #Obtain the user 
+    user = User.objects.get(username=request.user.username)        
+
     current_price = item.starting_price
     bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
     for bid in bids:
@@ -119,7 +122,6 @@ def listing_view(request, listing_id):
     if request.method == "POST":
         bidform = NewBidForm(request.POST)
         if bidform.is_valid():
-            user = User.objects.get(username=request.user.username)
             price = bidform.cleaned_data["price"]
             listing = Listing.objects.get(id=listing_id)
 
@@ -152,9 +154,9 @@ def listing_view(request, listing_id):
                 "comments": comments
             })
     else:
-    
+        #Determine watching (ie whether user is already watching this item)
+        watching = (len(Watch.objects.filter(user=user).filter(listing=item)) >=1)             
         return render(request, "auctions/listing_view.html", {
-    #        "message": "Are you logged in?",
             "title": item.title,
             "description": item.description,
             "listing_id": item.id,
@@ -162,7 +164,8 @@ def listing_view(request, listing_id):
             "bids": bids,
             "bidform": NewBidForm,
             "commentform": NewCommentForm,
-            "comments": comments
+            "comments": comments,
+            "is_watching": watching,
         })
 
 @login_required    
@@ -227,15 +230,16 @@ def watch(request, listing_id):
             return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
         #Check whether user is already watching this item
         user = User.objects.get(username=request.user.username)
-        tempquery = Watch.objects.filter(user=user).filter(listing=item)
-        print(len(tempquery))
-        if len(tempquery) >=1:
-            return HttpResponse("You are already watching item (" + listing_id + ") .<br>" + "<a href=" + "/" + ">Home</a>")
+        items_watched = Watch.objects.filter(user=user).filter(listing=item)
+        print(len(items_watched))
+        if len(items_watched) >=1:             
+            items_watched.delete() #Remove the watch(s)
+            return HttpResponse("You are no longer watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
 
         #Create and save the new watch
         watch = Watch(user=user,listing=item)
         watch.save()
-        return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + "/" + ">Home</a>")
+        return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
 #        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
 
 

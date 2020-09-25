@@ -37,7 +37,13 @@
             {% csrf_token %}
             <br>
             <div>
-                <input class="btn btn-primary" type="submit" value="Watch This Item">
+                <p>
+                    <input class="btn btn-primary" type="submit" value="Watch / Unwatch">
+                    {% if is_watching %}
+                        You are watching this item
+                    {% endif %}
+                </p>
+
             </div>
             <br>
         </form>        
