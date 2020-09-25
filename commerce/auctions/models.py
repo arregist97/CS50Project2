@@ -14,6 +14,7 @@ class Listing(models.Model):
     starting_price = models.FloatField()
     seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     photo = models.CharField(max_length=256)
+    is_closed = models.BooleanField(default=False)
 
     def __str__(self):
         current_price = self.starting_price
@@ -38,7 +39,7 @@ class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f"{self.user.username}:{self.listing.title}"
+        return f"{self.user.username}:{self.text}"
 
 class Watch(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
