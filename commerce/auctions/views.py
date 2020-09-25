@@ -242,6 +242,12 @@ def watch(request, listing_id):
             #return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
         return HttpResponseRedirect(reverse("listing_id", args=listing_id))
 
+@login_required
+def watching(request):
+    user = User.objects.get(username=request.user.username)
+    return render(request, "auctions/watching.html", {
+        "Watches": Watch.objects.filter(user=user),
+    })
 
 @login_required
 def close(request, listing_id):
