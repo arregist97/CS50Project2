@@ -19,6 +19,8 @@
                 {% endif %}
                 <p>{{ listing.description }}</p>
             </li>
+        {% empty %}
+            <li>(No listings)</li>
         {% endfor %}
     </ul>
 {% endblock %}

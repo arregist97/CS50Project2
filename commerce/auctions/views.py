@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import Listing, User, Bid, Comment
+from .models import Listing, User, Bid, Comment, Watch
 from django.contrib.auth.decorators import login_required
 from django import forms
 
@@ -107,6 +107,10 @@ def listing_view(request, listing_id):
     except:
         return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
 
+    #Obtain the user 
+    if request.user.is_authenticated:
+        user = User.objects.get(username=request.user.username)        
+
     current_price = item.starting_price
     bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
     for bid in bids:
@@ -119,7 +123,6 @@ def listing_view(request, listing_id):
         if request.user.is_authenticated:
             bidform = NewBidForm(request.POST)
             if bidform.is_valid():
-                user = User.objects.get(username=request.user.username)
                 price = bidform.cleaned_data["price"]
                 listing = Listing.objects.get(id=listing_id)
 
@@ -154,9 +157,9 @@ def listing_view(request, listing_id):
         else:
             return HttpResponseRedirect(reverse("login"))
     else:
-    
+        #Determine watching (ie whether user is already watching this item)
+        watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1)             
         return render(request, "auctions/listing_view.html", {
-    #        "message": "Are you logged in?",
             "title": item.title,
             "description": item.description,
             "listing_id": item.id,
@@ -164,7 +167,8 @@ def listing_view(request, listing_id):
             "bids": bids,
             "bidform": NewBidForm,
             "commentform": NewCommentForm,
-            "comments": comments
+            "comments": comments,
+            "is_watching": watching,
         })
 
 @login_required(login_url='/login')  
@@ -208,6 +212,7 @@ def comment(request, listing_id):
     else:
     
         return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+
 @login_required(login_url='/login')
 def close(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
@@ -215,3 +220,34 @@ def close(request, listing_id):
         listing.is_closed = True
         listing.save()
     return HttpResponseRedirect(reverse("index"))
+
+@login_required(login_url='/login')
+def watch(request, listing_id):
+    if request.method == "POST":
+        #Check listing id is valid
+        items = Listing.objects.all()
+        try:
+            item = items.get(pk=listing_id)
+        except:
+            return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
+        #Check whether user is already watching this item
+        user = User.objects.get(username=request.user.username)
+        items_watched = Watch.objects.filter(user=user).filter(listing=item)
+        print(len(items_watched))
+        if len(items_watched) >=1:             
+            items_watched.delete() #Remove the watch(s)
+            #return HttpResponse("You are no longer watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
+        else:
+            #Create and save the new watch
+            watch = Watch(user=user,listing=item)
+            watch.save()
+            #return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
+        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+
+@login_required(login_url='/login')
+def watching(request):
+    user = User.objects.get(username=request.user.username)
+    return render(request, "auctions/watching.html", {
+        "Watches": Watch.objects.filter(user=user),
+    })
+
