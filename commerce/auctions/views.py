@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import Listing, User, Bid, Comment
+from .models import Listing, User, Bid, Comment, Watch
 from django.contrib.auth.decorators import login_required
 from django import forms
 
@@ -163,7 +163,7 @@ def listing_view(request, listing_id):
             "comments": comments
         })
 
-    
+@login_required
 def comment(request, listing_id):
     items = Listing.objects.all()
     try:
@@ -213,3 +213,27 @@ def comment(request, listing_id):
             "commentform": NewCommentForm,
             "comments": comments
         })
+
+@login_required
+def watch(request, listing_id):
+    if request.method == "POST":
+        #Check listing id is valid
+        items = Listing.objects.all()
+        try:
+            item = items.get(pk=listing_id)
+        except:
+            return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
+        #Check whether user is already watching this item
+        user = User.objects.get(username=request.user.username)
+        tempquery = Watch.objects.filter(user=user).filter(listing=item)
+        print(len(tempquery))
+        if len(tempquery) >=1:
+            return HttpResponse("You are already watching item (" + listing_id + ") .<br>" + "<a href=" + "/" + ">Home</a>")
+
+        #Create and save the new watch
+        watch = Watch(user=user,listing=item)
+        watch.save()
+        return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + "/" + ">Home</a>")
+#        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+
+

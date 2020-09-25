@@ -33,6 +33,14 @@
             </div>
         </form>
         
+        <form action="{% url 'watch' listing_id %}" method="POST">
+            {% csrf_token %}
+            <br>
+            <div>
+                <input class="btn btn-primary" type="submit" value="Watch This Item">
+            </div>
+            <br>
+        </form>        
 
         <h3>Make a Comment</h3>
         <form action="{% url 'comment' listing_id %}" method="POST">
