@@ -11,6 +11,12 @@
                 <a href="{% url 'listing_id' listing.id %}">
                     {{ listing.title }}
                 </a>
+                {% if listing.seller == User %}
+                <form action="{% url 'close' listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <input class="btn btn-primary" type="submit" value="Close Listing">
+                </form>
+                {% endif %}
                 <p>{{ listing.description }}</p>
             </li>
         {% endfor %}

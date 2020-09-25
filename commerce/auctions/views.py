@@ -11,7 +11,8 @@ from django import forms
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "Listings": Listing.objects.all()
+        "Listings": Listing.objects.filter(is_closed=False),
+        "User": request.user
     })
 
 
@@ -99,6 +100,7 @@ class NewBidForm(forms.Form):
 class NewCommentForm(forms.Form):
     comment = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Comment")
 
+@login_required
 def listing_view(request, listing_id):
     items = Listing.objects.all()
     try:
@@ -163,7 +165,7 @@ def listing_view(request, listing_id):
             "comments": comments
         })
 
-    
+@login_required    
 def comment(request, listing_id):
     items = Listing.objects.all()
     try:
@@ -213,3 +215,9 @@ def comment(request, listing_id):
             "commentform": NewCommentForm,
             "comments": comments
         })
+@login_required
+def close(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+    listing.is_closed = True
+    listing.save()
+    return HttpResponseRedirect(reverse("index"))
