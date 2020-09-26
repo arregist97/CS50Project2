@@ -219,6 +219,14 @@ def close(request, listing_id):
     if listing.seller.username == request.user.username:
         listing.is_closed = True
         listing.save()
+        bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
+        current_price = 0
+
+        for bid in bids:
+            if (bid.price >= current_price):
+                current_price = bid.price
+                winner = bid.user
+        
     return HttpResponseRedirect(reverse("index"))
 
 @login_required(login_url='/login')
