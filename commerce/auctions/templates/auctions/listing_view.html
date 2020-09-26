@@ -16,10 +16,17 @@
         <p>Current Price: ${{current_price}}</p>
     </div>
 
+    {% if seller == User %}
+        <form action="{% url 'close' listing_id %}" method="POST">
+            {% csrf_token %}
+            <input class="btn btn-primary" type="submit" value="Close Listing">
+        </form>
+    {% endif %}
+
     <ul>
         {%for bid in bids %}
             <li>{{ bid }}</li>
-
+        
         {% endfor %}
     </ul>
 

@@ -11,8 +11,7 @@ from django import forms
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "Listings": Listing.objects.filter(is_closed=False),
-        "User": request.user
+        "Listings": Listing.objects.filter(is_closed=False)
     })
 
 
@@ -132,6 +131,8 @@ def listing_view(request, listing_id):
                     "title": item.title,
                     "description": item.description,
                     "listing_id": item.id,
+                    "seller": item.seller,
+                    "User": request.user,
                     "current_price": current_price,
                     "bids": bids,
                     "bidform": bidform,
@@ -148,6 +149,8 @@ def listing_view(request, listing_id):
                     "title": item.title,
                     "description": item.description,
                     "listing_id": item.id,
+                    "seller": item.seller,
+                    "User": request.user,
                     "current_price": current_price,
                     "bids": bids,
                     "bidform": bidform,
@@ -163,6 +166,8 @@ def listing_view(request, listing_id):
             "title": item.title,
             "description": item.description,
             "listing_id": item.id,
+            "seller": item.seller,
+            "User": request.user,
             "current_price": current_price,
             "bids": bids,
             "bidform": NewBidForm,
@@ -203,6 +208,8 @@ def comment(request, listing_id):
                 "title": item.title,
                 "description": item.description,
                 "listing_id": item.id,
+                "seller": item.seller,
+                "User": request.user,
                 "current_price": current_price,
                 "bids": bids,
                 "bidform": NewBidForm,
