@@ -30,6 +30,12 @@
         {% endfor %}
     </ul>
 
+    {% if listing.is_closed %}
+        <h4>Bidding on this item is now closed.</h4>
+        {% if User == winner %}
+            <h5>You are the winner. Congratulations!</h5>
+        {% endif %}
+    {% endif %}
     <div>
         <h3>Make a Bid</h3>
         <form action="{% url 'listing_id' listing.id %}" method="POST">

@@ -105,6 +105,8 @@ def listing_view(request, listing_id):
         item = items.get(pk=listing_id)
     except:
         return HttpResponse("Error: item number (" + listing_id + ") not found.<br>" + "<a href=" + "/" + ">Home</a>")
+    
+    
 
     #Obtain the user 
     if request.user.is_authenticated:
@@ -112,9 +114,12 @@ def listing_view(request, listing_id):
 
     current_price = item.starting_price
     bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
+    winner = None
     for bid in bids:
         if (bid.price >= current_price):
             current_price = bid.price
+            if item.is_closed:
+                winner = bid.user                
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
 
@@ -134,7 +139,8 @@ def listing_view(request, listing_id):
                     "bids": bids,
                     "bidform": bidform,
                     "commentform": NewCommentForm,
-                    "comments": comments
+                    "comments": comments,
+                    "winner": winner
                 })
 
                 bid = Bid(user=user, price=price, listing=listing)
@@ -149,7 +155,8 @@ def listing_view(request, listing_id):
                     "bids": bids,
                     "bidform": bidform,
                     "commentform": NewCommentForm,
-                    "comments": comments
+                    "comments": comments,
+                    "winner": winner
                 })
         else:
             return HttpResponseRedirect(reverse("login"))
@@ -165,6 +172,7 @@ def listing_view(request, listing_id):
             "commentform": NewCommentForm,
             "comments": comments,
             "is_watching": watching,
+            "winner": winner
         })
 
 @login_required(login_url='/login')  
@@ -177,9 +185,12 @@ def comment(request, listing_id):
 
     current_price = item.starting_price
     bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
+    winner = None
     for bid in bids:
         if (bid.price >= current_price):
             current_price = bid.price
+            if item.is_closed:
+                winner = bid.user 
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
 
@@ -202,7 +213,8 @@ def comment(request, listing_id):
                 "bids": bids,
                 "bidform": NewBidForm,
                 "commentform": commentform,
-                "comments": comments
+                "comments": comments,
+                "winner": winner
             })
     else:
     
@@ -213,15 +225,7 @@ def close(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
     if listing.seller.username == request.user.username:
         listing.is_closed = True
-        listing.save()
-        bids = Bid.objects.filter(listing=Listing.objects.get(id=listing_id))
-        current_price = 0
-
-        for bid in bids:
-            if (bid.price >= current_price):
-                current_price = bid.price
-                winner = bid.user
-        
+        listing.save()      
     return HttpResponseRedirect(reverse("index"))
 
 @login_required(login_url='/login')
