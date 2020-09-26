@@ -2,8 +2,8 @@
 
 {% block body %}
 
-    <h2>Item: {{ title }}</h2>
-    <p>Item ID: {{ listing_id }}</p>
+    <h2>Item: {{ listing.title }}</h2>
+    <p>Item ID: {{ listing.id }}</p>
 
 
     {% if message %}
@@ -12,12 +12,12 @@
 
     <div>
         <h4>Description:</h4>
-        <p>{{description}}</p>
+        <p>{{listing.description}}</p>
         <p>Current Price: ${{current_price}}</p>
     </div>
 
-    {% if seller == User %}
-        <form action="{% url 'close' listing_id %}" method="POST">
+    {% if listing.seller == User %}
+        <form action="{% url 'close' listing.id %}" method="POST">
             {% csrf_token %}
             <input class="btn btn-primary" type="submit" value="Close Listing">
         </form>
@@ -32,7 +32,7 @@
 
     <div>
         <h3>Make a Bid</h3>
-        <form action="{% url 'listing_id' listing_id %}" method="POST">
+        <form action="{% url 'listing_id' listing.id %}" method="POST">
             {% csrf_token %}
             {{ bidform }}
             <div>
@@ -40,7 +40,7 @@
             </div>
         </form>
         
-        <form action="{% url 'watch' listing_id %}" method="POST">
+        <form action="{% url 'watch' listing.id %}" method="POST">
             {% csrf_token %}
             <br>
             <div>
@@ -56,7 +56,7 @@
         </form>        
 
         <h3>Make a Comment</h3>
-        <form action="{% url 'comment' listing_id %}" method="POST">
+        <form action="{% url 'comment' listing.id %}" method="POST">
             {% csrf_token %}
             {{ commentform }}
             <div>

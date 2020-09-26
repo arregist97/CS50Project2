@@ -118,7 +118,7 @@ def listing_view(request, listing_id):
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
 
-    if request.method == "POST":
+    if request.method == "POST" and not item.is_closed:
         if request.user.is_authenticated:
             bidform = NewBidForm(request.POST)
             if bidform.is_valid():
@@ -128,10 +128,7 @@ def listing_view(request, listing_id):
                 if(price <= current_price):
                     return render(request, "auctions/listing_view.html", {
                     "message": "Price must be higher than current price: " + str(current_price) + ".",
-                    "title": item.title,
-                    "description": item.description,
-                    "listing_id": item.id,
-                    "seller": item.seller,
+                    "listing": item,
                     "User": request.user,
                     "current_price": current_price,
                     "bids": bids,
@@ -146,10 +143,7 @@ def listing_view(request, listing_id):
             else:
             
                 return render(request, "auctions/listing_view.html", {
-                    "title": item.title,
-                    "description": item.description,
-                    "listing_id": item.id,
-                    "seller": item.seller,
+                    "listing": item,
                     "User": request.user,
                     "current_price": current_price,
                     "bids": bids,
@@ -163,10 +157,7 @@ def listing_view(request, listing_id):
         #Determine watching (ie whether user is already watching this item)
         watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1)             
         return render(request, "auctions/listing_view.html", {
-            "title": item.title,
-            "description": item.description,
-            "listing_id": item.id,
-            "seller": item.seller,
+            "listing": item,
             "User": request.user,
             "current_price": current_price,
             "bids": bids,
@@ -205,10 +196,7 @@ def comment(request, listing_id):
         else:
             
             return render(request, "auctions/listing_view.html", {
-                "title": item.title,
-                "description": item.description,
-                "listing_id": item.id,
-                "seller": item.seller,
+                "listing": item,
                 "User": request.user,
                 "current_price": current_price,
                 "bids": bids,
