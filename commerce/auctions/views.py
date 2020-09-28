@@ -122,6 +122,8 @@ def listing_view(request, listing_id):
                 winner = bid.user                
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
+    #Determine watching (ie whether user is already watching this item)
+    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1) 
 
     if request.method == "POST" and not item.is_closed:
         if request.user.is_authenticated:
@@ -140,6 +142,7 @@ def listing_view(request, listing_id):
                     "bidform": bidform,
                     "commentform": NewCommentForm,
                     "comments": comments,
+                    "is_watching": watching,
                     "winner": winner
                 })
 
@@ -156,13 +159,13 @@ def listing_view(request, listing_id):
                     "bidform": bidform,
                     "commentform": NewCommentForm,
                     "comments": comments,
+                    "is_watching": watching,
                     "winner": winner
                 })
         else:
             return HttpResponseRedirect(reverse("login"))
     else:
-        #Determine watching (ie whether user is already watching this item)
-        watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1)             
+                    
         return render(request, "auctions/listing_view.html", {
             "listing": item,
             "User": request.user,
@@ -193,6 +196,8 @@ def comment(request, listing_id):
                 winner = bid.user 
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
+    #Determine watching (ie whether user is already watching this item)
+    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1) 
 
     if request.method == "POST":
         commentform = NewCommentForm(request.POST)
@@ -214,6 +219,7 @@ def comment(request, listing_id):
                 "bidform": NewBidForm,
                 "commentform": commentform,
                 "comments": comments,
+                "is_watching": watching,
                 "winner": winner
             })
     else:
