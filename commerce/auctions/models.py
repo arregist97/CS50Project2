@@ -15,6 +15,7 @@ class Listing(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     photo = models.CharField(max_length=256)
     is_closed = models.BooleanField(default=False)
+    category = models. CharField(max_length=64, null=True)
 
     def __str__(self):
         current_price = self.starting_price
