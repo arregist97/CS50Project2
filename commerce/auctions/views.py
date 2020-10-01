@@ -14,6 +14,16 @@ def index(request):
         "Listings": Listing.objects.filter(is_closed=False)
     })
 
+def categories(request):
+    return render(request, "auctions/categories.html")
+
+def category(request, category_id):
+    
+    return render(request, "auctions/category.html", {
+        "Title": category_id.capitalize(),
+        "Listings": Listing.objects.filter(is_closed=False),
+        "Category": category_id
+    })
 
 def login_view(request):
     if request.method == "POST":

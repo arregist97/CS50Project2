@@ -11,6 +11,9 @@
                 <a href="{% url 'listing_id' listing.id %}">
                     {{ listing.title }}
                 </a>
+                <div>
+                    {{ listing.category }}
+                </div>
                 
                 <p>{{ listing.description }}</p>
             </li>
