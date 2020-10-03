@@ -80,6 +80,7 @@ class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(widget=forms.Textarea(attrs={"style": "resize: none;"}), label="Description")
     price = forms.FloatField(label="Price")
+    image = forms. CharField(label="Image URL", required=False)
     category= forms.CharField(label='Category', widget=forms.Select(choices=[('other', 'Other'),
     ('sports', 'Sports'),
     ('fashion', 'Fashion'),
@@ -96,9 +97,10 @@ def listing(request):
             description = form.cleaned_data["description"]
             price = form.cleaned_data["price"]
             seller = User.objects.get(username=request.user.username)
+            image = form.cleaned_data["image"]
             category = form.cleaned_data["category"]
 
-            listing = Listing(title=title, description=description, starting_price=price, seller=seller, category=category)
+            listing = Listing(title=title, description=description, starting_price=price, seller=seller, photo=image, category=category)
             listing.save()
             return HttpResponseRedirect(reverse("index"))
         else:

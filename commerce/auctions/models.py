@@ -13,7 +13,7 @@ class Listing(models.Model):
     description = models.CharField(max_length=65536)
     starting_price = models.FloatField()
     seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    photo = models.CharField(max_length=256)
+    photo = models.CharField(max_length=256, blank=True, null=True)
     is_closed = models.BooleanField(default=False)
     category = models. CharField(max_length=64, null=True)
 
