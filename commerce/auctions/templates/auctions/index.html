@@ -16,7 +16,7 @@
                 </div>
 
                 {% if not listing.photo == "" %}
-                    img src="{{ listing.photo }}" alt="{{ listing.title }}">
+                    <img src="{{ listing.photo }}" alt="{{ listing.title }}" style="max-width:500px;max-height:500px">
                 {% endif %}
                 
                 <p>{{ listing.description }}</p>

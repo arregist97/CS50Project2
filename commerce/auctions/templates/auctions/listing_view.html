@@ -10,6 +10,10 @@
         <div>{{ message }}</div>
     {% endif %}
 
+    {% if not listing.photo == "" %}
+        <img src="{{ listing.photo }}" alt="{{ listing.title }}" style="max-width:500px;max-height:500px">
+    {% endif %}
+
     <div>
         <h4>Description:</h4>
         <p>{{listing.description}}</p>

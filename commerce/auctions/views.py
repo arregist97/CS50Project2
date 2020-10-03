@@ -142,7 +142,7 @@ def listing_view(request, listing_id):
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
     #Determine watching (ie whether user is already watching this item)
-    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1) 
+    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=request.user).filter(listing=item)) >=1) 
 
     if request.method == "POST" and not item.is_closed:
         if request.user.is_authenticated:
@@ -216,7 +216,7 @@ def comment(request, listing_id):
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
     #Determine watching (ie whether user is already watching this item)
-    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=user).filter(listing=item)) >=1) 
+    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=request.user).filter(listing=item)) >=1) 
 
     if request.method == "POST":
         commentform = NewCommentForm(request.POST)
