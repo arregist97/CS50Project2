@@ -167,7 +167,7 @@ def listing_view(request, listing_id):
 
                 bid = Bid(user=user, price=price, listing=listing)
                 bid.save()
-                return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+                return HttpResponseRedirect(reverse("listing_id", args=(listing_id,)))
             else:
             
                 return render(request, "auctions/listing_view.html", {
@@ -199,6 +199,7 @@ def listing_view(request, listing_id):
 
 @login_required(login_url='/login')  
 def comment(request, listing_id):
+    print(listing_id)
     items = Listing.objects.all()
     try:
         item = items.get(pk=listing_id)
@@ -216,7 +217,7 @@ def comment(request, listing_id):
     
     comments = Comment.objects.filter(listing=Listing.objects.get(id=listing_id))
     #Determine watching (ie whether user is already watching this item)
-    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=request.user).filter(listing=item)) >=1) 
+    watching = (request.user.is_authenticated) and (len(Watch.objects.filter(user=request.user).filter(listing=item)) >=1)
 
     if request.method == "POST":
         commentform = NewCommentForm(request.POST)
@@ -227,9 +228,9 @@ def comment(request, listing_id):
 
             comment = Comment(user=user, text=text, listing=listing)
             comment.save()
-            return HttpResponseRedirect(reverse("listing_id", args=listing_id))
-        else:
-            
+            print(listing_id)
+            return HttpResponseRedirect(reverse("listing_id", args=(listing_id,)))
+        else: 
             return render(request, "auctions/listing_view.html", {
                 "listing": item,
                 "User": request.user,
@@ -243,7 +244,7 @@ def comment(request, listing_id):
             })
     else:
     
-        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+        return HttpResponseRedirect(reverse("listing_id", args=(listing_id,)))
 
 @login_required(login_url='/login')
 def close(request, listing_id):
@@ -274,7 +275,7 @@ def watch(request, listing_id):
             watch = Watch(user=user,listing=item)
             watch.save()
             #return HttpResponse("You are now watching item (" + listing_id + ") .<br>" + "<a href=" + reverse("listing_id", args=listing_id) + ">Back to listing</a>")
-        return HttpResponseRedirect(reverse("listing_id", args=listing_id))
+        return HttpResponseRedirect(reverse("listing_id", args=(listing_id,)))
 
 @login_required(login_url='/login')
 def watching(request):
